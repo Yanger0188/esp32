@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能农业监控系统</title>
+    <style>
+        /* 通用样式 */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        /* 登录界面 */
+        .login-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+        }
+
+        .login-box {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        #deviceId {
+            width: 200px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #3d77ff;
+            border-radius: 4px;
+        }
+
+        .login-btn {
+            background-color: #3d77ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .error-msg {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* 主界面 */
+        .page-container {
+            padding: 10px;
+            display: none;
+        }
+
+        .header-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .header-1, .header-2 {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+
+        .data-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .data-item {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .data-picture {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .data-text {
+            flex: 1;
+        }
+
+        .data-title {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .data-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        switch {
+            zoom: 0.8;
+        }
+
+        .light-control-container {
+            margin-top: 10px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        slider {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录界面 -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h2>设备登录</h2>
+            <input type="text" id="deviceId" placeholder="请输入设备ID">
+            <br>
+            <button class="login-btn" onclick="checkDeviceId()">登录</button>
+            <p class="error-msg" id="loginError">设备ID错误，请重新输入！</p>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div class="page-container" id="mainContainer">
+        <!-- 头部天气 -->
+        <div class="header-container">
+            <div class="header-1">
+                <div>空气质量</div>
+                <div>气温</div>
+                <div>栾川-洛阳市</div>
+            </div>
+            <div class="header-2">
+                <div>56良</div>
+                <div>0℃</div>
+                <div>大雪</div>
+            </div>
+            <div class="header-3">
+                <div>少出门，多穿衣，注保暖</div>
+            </div>
+        </div>
+
+        <!-- 数据展示 -->
+        <div class="data-container">
+            <!-- 设备状态 -->
+            <div class="data-item">
+                <img src="图片/设备状态.png" class="data-picture">
+                <div class="data-text">
+                    <div class="data-title">设备状态</div>
+                    <div class="data-value" id="deviceStatus">--</div>
+                </div>
+            </div>
+
+            <!-- 环境温度 -->
+            <div class="data-item">
+                <img src="图片/温度.png" class="data-picture">
+                <div class="data-text">
+                    <div class="data-title">环境温度</div>
+                    <div class="data-value" id="environmentTemperature">--℃</div>
+                </div>
+            </div>
+
+            <!-- 环境湿度 -->
+            <div class="data-item">
+                <img src="图片/湿度.png" class="data-picture">
+                <div class="data-text">
+                    <div class="data-title">环境湿度</div>
+                    <div class="data-value" id="environmentHumidity">--%</div>
+                </div>
+            </div>
+
+            <!-- 加湿器开关 -->
+            <div class="data-item">
+                <img src="图片/加湿器.png" class="data-picture">
+                <div class="data-text">
+                    <div class="data-title">模式切换</div>
+                    <label class="switch">
+                        <input type="checkbox" id="switch1" onchange="handleSwitchChange(event)" data-param="mode">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 土壤湿度阈值 -->
+        <div class="light-control-container">
+            <div class="data-item">
+                <img src="图片/灯.png" class="data-picture">
+                <div class="data-text">
+                    <div class="data-title">土壤湿度阈值</div>
+                    <input type="range" id="soilThreshold" min="0" max="100" 
+                           onchange="handleSliderChange(event)" data-param="soil_threshold1">
+                    <span id="thresholdValue">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置信息
+        const config = {
+            auth_info: "version=2022-05-01&res=userid%2F421809&et=2054270651&method=sha1&sign=diFvoYfGYDJbMoG72sDK4EoNioc%3D",
+            product_id: "i7Khm9ZH39",
+            api_base_url: "https://iot-api.heclouds.com",
+            limit: 1
+        };
+
+        // 状态管理
+        let currentDevice = {
+            name: "",
+            data: null,
+            status: null,
+            lastClickTime: 0,
+            clickCount: 0,
+            isSyncAllowed: true
+        };
+
+        // 登录验证
+        function checkDeviceId() {
+            const deviceId = document.getElementById('deviceId').value;
+            if (deviceId === 'Test1') {
+                currentDevice.name = deviceId;
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                initializeApp();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // 初始化应用
+        function initializeApp() {
+            fetchData();
+            fetchDeviceStatus();
+            setInterval(() => {
+                fetchData();
+                fetchDeviceStatus();
+            }, 3000);
+        }
+
+        // 获取设备数据
+        async function fetchData() {
+            try {
+                const url = `${config.api_base_url}/thingmodel/query-device-property?` + 
+                          `product_id=${config.product_id}&device_name=${currentDevice.name}`;
+                
+                const response = await fetch(url, {
+                    headers: { 'Authorization': config.auth_info }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 0 && currentDevice.isSyncAllowed) {
+                    updateDeviceData(data);
+                }
+            } catch (error) {
+                console.error('数据获取失败:', error);
+            }
+        }
+
+        // 更新设备数据
+        function updateDeviceData(data) {
+            // 更新温度
+            document.getElementById('environmentTemperature').textContent = 
+                `${data.data[7].value}℃`;
+            
+            // 更新湿度
+            document.getElementById('environmentHumidity').textContent = 
+                `${data.data[1].value}%`;
+            
+            // 更新开关状态
+            document.getElementById('switch1').checked = 
+                data.data[3].value === 'true';
+        }
+
+        // 开关控制处理
+        async function handleSwitchChange(event) {
+            const param = event.target.dataset.param;
+            const value = event.target.checked;
+            
+            // 防抖逻辑
+            const now = Date.now();
+            if (now - currentDevice.lastClickTime < 1000) {
+                currentDevice.clickCount++;
+                if (currentDevice.clickCount >= 2) {
+                    alert('操作过于频繁');
+                    event.target.checked = !value;
+                    return;
+                }
+            } else {
+                currentDevice.clickCount = 1;
+            }
+            currentDevice.lastClickTime = now;
+
+            // 发送控制命令
+            try {
+                const response = await fetch(`${config.api_base_url}/thingmodel/set-device-property`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': config.auth_info,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_id: config.product_id,
+                        device_name: currentDevice.name,
+                        params: { [param]: value }
+                    })
+                });
+
+                const result = await response.json();
+                if (result.code !== 0) {
+                    event.target.checked = !value;
+                }
+            } catch (error) {
+                console.error('控制命令发送失败:', error);
+                event.target.checked = !value;
+            }
+        }
+
+        // 初始化设备状态
+        async function fetchDeviceStatus() {
+            try {
+                const url = `${config.api_base_url}/device/status-history?` +
+                          `product_id=${config.product_id}&` +
+                          `device_name=${currentDevice.name}&` +
+                          `limit=${config.limit}`;
+
+                const response = await fetch(url, {
+                    headers: { 'Authorization': config.auth_info }
+                });
+                
+                const data = await response.json();
+                updateDeviceStatus(data);
+            } catch (error) {
+                console.error('状态获取失败:', error);
+            }
+        }
+
+        // 更新设备状态显示
+        function updateDeviceStatus(data) {
+            const statusElement = document.getElementById('deviceStatus');
+            if (data.data.list[0].status === 1) {
+                statusElement.textContent = '在线';
+                statusElement.style.color = '#00f03c';
+            } else {
+                statusElement.textContent = '离线';
+                statusElement.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>
